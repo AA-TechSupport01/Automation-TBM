@@ -1,0 +1,334 @@
+IF (File.IfFile.Exists File: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report\\RKEMINWK.TXT''') THEN
+    File.Delete Files: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report\\RKEMINWK.TXT'''
+END
+LABEL Retry
+Outlook.Launch Instance=> OutlookInstance
+DateTime.GetCurrentDateTime.Local DateTimeFormat: DateTime.DateTimeFormat.DateOnly CurrentDateTime=> CurrentDateTime
+Text.ConvertDateTimeToText.FromCustomDateTime DateTime: CurrentDateTime CustomFormat: $'''yyyy''' Result=> year
+DateTime.Subtract FromDate: CurrentDateTime SubstractDate: $'''1/1/%year% 12:00:00 AM''' TimeUnit: DateTime.DifferenceTimeUnit.Days TimeDifference=> TimeDifference
+Text.ToNumber Text: TimeDifference / 7 Number=> weekno
+Variables.TruncateNumber.GetDecimalPart Number: weekno Result=> Current_week
+IF Current_week = 0 THEN
+    Variables.TruncateNumber.GetIntegerPart Number: weekno Result=> Current_week
+ELSE
+    Variables.TruncateNumber.GetIntegerPart Number: weekno + 1 Result=> Current_week
+END
+DateTime.Add DateTime: CurrentDateTime TimeToAdd: -1 TimeUnit: DateTime.TimeUnit.Days ResultedDate=> ResultedDate
+Text.ConvertDateTimeToText.FromCustomDateTime DateTime: ResultedDate CustomFormat: $'''yyMMdd''' Result=> transdate
+DISABLE Folder.Create FolderPath: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report''' FolderName: CurrentDateTime Folder=> NewFolder2
+Outlook.RetrieveEmailMessages.RetrieveEmailsAndSaveAttachments Instance: OutlookInstance Account: $'''mann.sethi@maersk.com''' MailFolder: $'''RKEMF1''' EmailsToRetrieve: Outlook.RetrieveMessagesMode.Unread MarkAsRead: True FromContains: $'''CASpool@Maersk.com''' SubjectContains: $'''File=RKEMINWK User=SEW1 Dest=PQUX Class=I ''' SaveAttachmentsInto: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report''' Messages=> RetrievedEmails
+ON ERROR REPEAT 2 TIMES WAIT 2
+END
+File.ReadTextFromFile.ReadTextAsList File: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report\\RKEMINWK.TXT''' Encoding: File.TextFileEncoding.UTF8 Contents=> FileContents
+ON ERROR REPEAT 1 TIMES WAIT 2
+ON ERROR
+    GOTO Retry
+END
+Excel.LaunchExcel.LaunchUnderExistingProcess Visible: True Instance=> ExcelInstance
+WAIT 5
+DISABLE UIAutomation.SetWindowVisibility.SetVisibilityByInstanceOrHandle WindowInstance: ExcelInstance Visibility: UIAutomation.Visibility.Visible
+UIAutomation.SetWindowState.SetStateByInstanceOrHandle WindowInstance: ExcelInstance State: UIAutomation.WindowState.Maximized
+WAIT 5
+DISABLE File.ReadFromCSVFile.ReadCSV CSVFile: $'''C:\\Users\\MSE230\\Downloads\\RKEMINWK.TXT''' Encoding: File.CSVEncoding.UTF8 TrimFields: True FirstLineContainsColumnNames: False ColumnsSeparator: File.CSVColumnsSeparator.SystemDefault CSVTable=> CSVTable
+Excel.WriteToExcel.Write Instance: ExcelInstance Value: FileContents
+LOOP LoopIndex FROM 1 TO 3 STEP 1
+    Excel.DeleteRow Instance: ExcelInstance Index: 1
+END
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''{LControlKey}({H})''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+WAIT 5
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{Space}{Space}{Space}%transdate%{Tab}test_value{Space}%transdate%{Tab}{Tab}''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{Return}{Return}''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{Right}{Right}{Right}{Right}''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+WAIT 5
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{Return}'
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LControlKey}({Space})'
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LMenu}()'
+WAIT 5
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''a''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: True
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''e''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: True
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''d''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: True
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''n''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''s''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''t''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''n''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''t{Tab}{Tab}{Tab}{Tab}''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{RShiftKey}({Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right})''' DelayBetweenKeystrokes: 100 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+UIAutomation.SelectRadioButton RadioButton: appmask['Window \'Convert Text to Columns Wizard - Step 3 of 3\'']['Radio Button \'Text\'']
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''f''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{Apps}''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''d''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+Excel.GetFirstFreeColumnRow Instance: ExcelInstance FirstFreeColumn=> FirstFreeColumn FirstFreeRow=> FirstFreeRow
+DISABLE Excel.CopyCellsFromExcel.CopyCells Instance: ExcelInstance StartColumn: $'''h''' StartRow: 1 EndColumn: $'''i''' EndRow: FirstFreeRow
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{Up}'
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LControlKey}({F})'
+WAIT 5
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: 'test_value'
+WAIT 5
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{Tab}{Tab}{Tab}''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+WAIT 5
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{Return}'
+WAIT 5
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LMenu}({F4})'
+WAIT 5
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{Apps}ev''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+WAIT 5
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{RShiftKey}({RControlKey}({Down}))'
+WAIT 5
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{Delete}'
+WAIT 5
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LMenu}()'
+WAIT 5
+MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''hsf''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+WAIT 5
+Excel.ActivateCellInExcel.ActivateCell Instance: ExcelInstance Column: FirstFreeColumn Row: FirstFreeRow - 1
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{RShiftKey}({RControlKey}({Up}))''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+DISABLE MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LControlKey}({Space})'
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LMenu}()'
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''nt''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+DISABLE UIAutomation.PopulateTextField.PopulateTextField TextField: appmask['Window \'Create Table\'']['Edit \'Where is the data for your table?\''] Text: $'''$W$1:$W$%FirstFreeColumn - 1%''' Mode: UIAutomation.PopulateTextMode.Replace ClickType: UIAutomation.PopulateMouseClickType.SingleClick
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{Return}'
+WAIT 5
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{Down}=h2&\" \"&i2''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{Return}'
+@@source: 'Recorder'
+DISABLE WAIT 2
+@@source: 'Recorder'
+DISABLE MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: 'hsf{Right}{Right}{Right}{Right}{Right}{Right}'
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{Up}'
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{RShiftKey}({RControlKey}({Down}){Up})''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LControlKey}({C})'
+@@source: 'Recorder'
+WAIT 2
+DISABLE Excel.CopyCellsFromExcel.CopyCells Instance: ExcelInstance StartColumn: FirstFreeColumn StartRow: 2 EndColumn: FirstFreeColumn EndRow: FirstFreeRow - 1
+Excel.ActivateCellInExcel.ActivateCell Instance: ExcelInstance Column: $'''H''' Row: 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''{Apps}sv''' DelayBetweenKeystrokes: 2000 SendTextAsHardwareKeys: False
+DISABLE Excel.PasteCellsToExcel.PasteAt Instance: ExcelInstance Column: $'''H''' Row: 2
+Scripting.RunPythonScript PythonCode: $'''print chr(ord(\'@\')+%FirstFreeColumn%)''' ScriptOutput=> PythonScriptOutput
+Excel.ActivateCellInExcel.ActivateCell Instance: ExcelInstance Column: FirstFreeColumn Row: 2
+DISABLE Scripting.RunPythonScript PythonCode: $'''print chr(ord(\'@\')+%FirstFreeColumn - 1%)''' ScriptOutput=> PythonScriptOutput
+MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''=TEXTJOIN(\" \", TRUE, K2:{Left}''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+DISABLE Excel.ActivateCellInExcel.ActivateCell Instance: ExcelInstance Column: FirstFreeColumn - 1 Row: 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''{Return}''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{Up}'
+@@source: 'Recorder'
+WAIT 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: $'''{RShiftKey}({RControlKey}({Down}){Up})''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+WAIT 5
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LControlKey}({C})'
+@@source: 'Recorder'
+WAIT 2
+Excel.ActivateCellInExcel.ActivateCell Instance: ExcelInstance Column: $'''K''' Row: 2
+MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''{Apps}sv''' DelayBetweenKeystrokes: 2000 SendTextAsHardwareKeys: False
+Excel.ActivateCellInExcel.ActivateCell Instance: ExcelInstance Column: $'''L''' Row: 2
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LControlKey}({Space})'
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{RShiftKey}({RControlKey}({Right}))'
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{RShiftKey}({RControlKey}({Right}))'
+@@source: 'Recorder'
+WAIT 2
+@@source: 'Recorder'
+MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{Delete}'
+Excel.DeleteColumn Instance: ExcelInstance Column: $'''I'''
+WAIT 3
+DISABLE Excel.DeleteRow Instance: ExcelInstance Index: 4
+CALL Default_Format
+Excel.SelectCellsFromExcel.SelectCells Instance: ExcelInstance StartColumn: $'''a''' StartRow: 3 EndColumn: $'''j''' EndRow: FirstFreeRow - 1
+@@source: 'Recorder'
+DISABLE MouseAndKeyboard.SendKeys.FocusAndSendKeys TextToSend: '{LControlKey}({A})'
+WAIT 5
+MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''{LMenu}()''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+WAIT 5
+MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''hba''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+DISABLE WAIT 5
+DISABLE MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''{LMenu}()''' DelayBetweenKeystrokes: 10 SendTextAsHardwareKeys: False
+DISABLE WAIT 5
+DISABLE MouseAndKeyboard.SendKeys.FocusAndSendKeysByInstanceOrHandle WindowInstance: ExcelInstance TextToSend: $'''hal''' DelayBetweenKeystrokes: 1000 SendTextAsHardwareKeys: False
+WAIT 5
+Excel.DeleteRow Instance: ExcelInstance Index: 4
+WAIT 5
+Excel.ResizeColumnsOrRows.AutofitAllColumns Instance: ExcelInstance
+WAIT 5
+CALL Add_sensitivity
+Excel.CloseExcel.CloseAndSaveAs Instance: ExcelInstance DocumentFormat: Excel.ExcelFormat.FromExtension DocumentPath: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report\\RKEMF1 20%transdate%'''
+ON ERROR REPEAT 2 TIMES WAIT 2
+ON ERROR
+
+END
+DISABLE File.Delete Files: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Reject_wk_%Current_week%.xlsx'''
+WAIT 5
+IF Current_week <= 9 THEN
+    IF (Folder.IfFolderExists.DoesNotExist Path: $'''C:\\Users\\MSE230\\Maersk Group\\RKEM Team Site - RKEMF1 Error\\2024\\Week 0%Current_week%''') THEN
+        Folder.Create FolderPath: $'''C:\\Users\\MSE230\\Maersk Group\\RKEM Team Site - RKEMF1 Error\\%year%''' FolderName: $'''Week 0%Current_week%''' Folder=> NewFolder
+    END
+    File.Copy Files: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report\\RKEMF1 20%transdate%.xlsx''' Destination: $'''C:\\Users\\MSE230\\Maersk Group\\RKEM Team Site - RKEMF1 Error\\%year%\\Week 0%Current_week%''' IfFileExists: File.IfExists.Overwrite CopiedFiles=> CopiedFiles
+    IF (Folder.IfFolderExists.DoesNotExist Path: $'''\\\\CRB\\Fileshare\\GSC\\PH\\MNL\\MLIT\\ITS\\ML\\Operations\\Applications\\RKEM\\AdHoc Tasks\\RKEMF1\\2024\\Week 0%Current_week%''') THEN
+        Folder.Create FolderPath: $'''\\\\CRB\\Fileshare\\GSC\\PH\\MNL\\MLIT\\ITS\\ML\\Operations\\Applications\\RKEM\\AdHoc Tasks\\RKEMF1\\2024''' FolderName: $'''Week 0%Current_week%''' Folder=> NewFolder
+    END
+    File.Copy Files: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report\\RKEMF1 20%transdate%.xlsx''' Destination: $'''\\\\CRB\\Fileshare\\GSC\\PH\\MNL\\MLIT\\ITS\\ML\\Operations\\Applications\\RKEM\\AdHoc Tasks\\RKEMF1\\%year%\\Week 0%Current_week%''' IfFileExists: File.IfExists.Overwrite CopiedFiles=> CopiedFiles
+ELSE
+    IF (Folder.IfFolderExists.DoesNotExist Path: $'''C:\\Users\\MSE230\\Maersk Group\\RKEM Team Site - RKEMF1 Error\\2024\\Week %Current_week%''') THEN
+        Folder.Create FolderPath: $'''C:\\Users\\MSE230\\Maersk Group\\RKEM Team Site - RKEMF1 Error\\%year%''' FolderName: $'''Week %Current_week%''' Folder=> NewFolder
+    END
+    IF (Folder.IfFolderExists.DoesNotExist Path: $'''\\\\CRB\\Fileshare\\GSC\\PH\\MNL\\MLIT\\ITS\\ML\\Operations\\Applications\\RKEM\\AdHoc Tasks\\RKEMF1\\2024\\Week %Current_week%''') THEN
+        Folder.Create FolderPath: $'''\\\\CRB\\Fileshare\\GSC\\PH\\MNL\\MLIT\\ITS\\ML\\Operations\\Applications\\RKEM\\AdHoc Tasks\\RKEMF1\\2024''' FolderName: $'''Week %Current_week%''' Folder=> NewFolder
+    END
+    File.Copy Files: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report\\RKEMF1 20%transdate%.xlsx''' Destination: $'''\\\\CRB\\Fileshare\\GSC\\PH\\MNL\\MLIT\\ITS\\ML\\Operations\\Applications\\RKEM\\AdHoc Tasks\\RKEMF1\\%year%\\Week %Current_week%''' IfFileExists: File.IfExists.Overwrite CopiedFiles=> CopiedFiles
+    File.Copy Files: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\Documents\\RKEM F1 Report\\RKEMF1 20%transdate%.xlsx''' Destination: $'''C:\\Users\\MSE230\\Maersk Group\\RKEM Team Site - RKEMF1 Error\\%year%\\Week %Current_week%''' IfFileExists: File.IfExists.Overwrite CopiedFiles=> CopiedFiles
+END
+
+# [ControlRepository][PowerAutomateDesktop]
+
+{
+  "ControlRepositorySymbols": [
+    {
+      "IgnoreImagesOnSerialization": false,
+      "Repository": "{\r\n  \"Screens\": [\r\n    {\r\n      \"Controls\": [\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": null,\r\n          \"ElementTypeName\": \"Radio Button\",\r\n          \"InstanceId\": \"cb37675d-d19f-4301-97ec-78bb3d2a6d7b\",\r\n          \"Name\": \"Radio Button 'Text'\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": null,\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Checked\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Enabled\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": true\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Name\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"Text\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Selected\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": false\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Visible\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": true\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"Radio Button 'Text'\",\r\n                  \"Tag\": \"radiobutton\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"IsCustom\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"radiobutton\",\r\n          \"ScreenshotPath\": \"controlRepo-screenshots\\\\7a26681e-0a93-4706-b032-bb5506f5fae9.png\"\r\n        }\r\n      ],\r\n      \"ScreenShot\": null,\r\n      \"ElementTypeName\": \"Window\",\r\n      \"InstanceId\": \"fd2d7a6e-34f0-4fe7-ad6a-f9453f97e757\",\r\n      \"Name\": \"Window 'Convert Text to Columns Wizard - Step 3 of 3'\",\r\n      \"SelectorCount\": 1,\r\n      \"Selectors\": [\r\n        {\r\n          \"CustomSelector\": null,\r\n          \"Elements\": [\r\n            {\r\n              \"Attributes\": [\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Class\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": \"bosa_sdm_XL9\"\r\n                },\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Enabled\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": true\r\n                },\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Id\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": \"\"\r\n                },\r\n                {\r\n                  \"Ignore\": false,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Name\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": \"Convert Text to Columns Wizard - Step 3 of 3\"\r\n                },\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": true,\r\n                  \"Name\": \"Ordinal\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": 0\r\n                },\r\n                {\r\n                  \"Ignore\": false,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Process\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": \"EXCEL\"\r\n                },\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Visible\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": true\r\n                }\r\n              ],\r\n              \"CustomValue\": null,\r\n              \"Ignore\": false,\r\n              \"Name\": \"Window 'Convert Text to Columns Wizard - Step 3 of 3'\",\r\n              \"Tag\": \"window\"\r\n            }\r\n          ],\r\n          \"Ignore\": false,\r\n          \"IsCustom\": false,\r\n          \"IsWindowsInstance\": false,\r\n          \"Name\": \"Default Selector\",\r\n          \"Properties\": []\r\n        }\r\n      ],\r\n      \"Tag\": \"window\",\r\n      \"ScreenshotPath\": \"controlRepo-screenshots\\\\1703a2b3-95a1-4988-b30d-df4eb5bec6ca.png\"\r\n    },\r\n    {\r\n      \"Controls\": [\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": null,\r\n          \"ElementTypeName\": \"Edit\",\r\n          \"InstanceId\": \"92b0f597-511e-46dd-8f64-1f92c4bdd03d\",\r\n          \"Name\": \"Edit 'Where is the data for your table?'\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": null,\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"NetUIHWNDElement\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Enabled\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": true\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Name\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Process\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"EXCEL\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Visible\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": true\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"Pane 'NetUIHWNDElement'\",\r\n                  \"Tag\": \"pane\"\r\n                },\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"NetUINetUIDialog\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Enabled\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": true\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Name\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"Create Table\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Process\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"EXCEL\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Visible\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": true\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"Window 'Create Table'\",\r\n                  \"Tag\": \"window\"\r\n                },\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"NetUIRefedit\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Enabled\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": true\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Name\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"Where is the data for your table?\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"Name\": \"Visible\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": true\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"Edit 'Where is the data for your table?'\",\r\n                  \"Tag\": \"edit\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"IsCustom\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"edit\",\r\n          \"ScreenshotPath\": \"controlRepo-screenshots\\\\f347527a-b47a-4a4a-af5b-f57181fffcd6.png\"\r\n        }\r\n      ],\r\n      \"ScreenShot\": null,\r\n      \"ElementTypeName\": \"Window\",\r\n      \"InstanceId\": \"5a0b9919-0bc3-4193-a253-a457b5a82570\",\r\n      \"Name\": \"Window 'Create Table'\",\r\n      \"SelectorCount\": 1,\r\n      \"Selectors\": [\r\n        {\r\n          \"CustomSelector\": null,\r\n          \"Elements\": [\r\n            {\r\n              \"Attributes\": [\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Class\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": \"NUIDialog\"\r\n                },\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Enabled\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": true\r\n                },\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Id\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": \"\"\r\n                },\r\n                {\r\n                  \"Ignore\": false,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Name\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": \"Create Table\"\r\n                },\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": true,\r\n                  \"Name\": \"Ordinal\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": 0\r\n                },\r\n                {\r\n                  \"Ignore\": false,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Process\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": \"EXCEL\"\r\n                },\r\n                {\r\n                  \"Ignore\": true,\r\n                  \"IsOrdinal\": false,\r\n                  \"Name\": \"Visible\",\r\n                  \"Operation\": \"EqualTo\",\r\n                  \"Value\": true\r\n                }\r\n              ],\r\n              \"CustomValue\": null,\r\n              \"Ignore\": false,\r\n              \"Name\": \"Window 'Create Table'\",\r\n              \"Tag\": \"window\"\r\n            }\r\n          ],\r\n          \"Ignore\": false,\r\n          \"IsCustom\": false,\r\n          \"IsWindowsInstance\": false,\r\n          \"Name\": \"Default Selector\",\r\n          \"Properties\": []\r\n        }\r\n      ],\r\n      \"Tag\": \"window\",\r\n      \"ScreenshotPath\": \"controlRepo-screenshots\\\\0e4fa6f6-cbb4-4056-9e93-8a8314d36dca.png\"\r\n    }\r\n  ],\r\n  \"Version\": 1\r\n}",
+      "ImportMetadata": {
+        "DisplayName": "Local computer",
+        "ConnectionString": "",
+        "Type": "Local",
+        "DesktopType": "local"
+      },
+      "Name": "appmask"
+    }
+  ],
+  "ImageRepositorySymbol": {
+    "Repository": "{\r\n  \"Folders\": [],\r\n  \"Images\": [],\r\n  \"Version\": 1\r\n}",
+    "ImportMetadata": {},
+    "Name": "imgrepo"
+  },
+  "ConnectionReferences": []
+}
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////Sub Task-Default_Format/////////////////////////////////////////////////////////////
+
+Excel.LaunchExcel.LaunchAndOpenUnderExistingProcess Path: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\RKEMF1 20230314.xlsx''' Visible: True ReadOnly: False Instance=> ExcelInstance2
+WAIT 5
+UIAutomation.SetWindowVisibility.SetVisibilityByInstanceOrHandle WindowInstance: ExcelInstance Visibility: UIAutomation.Visibility.Visible
+UIAutomation.SetWindowState.SetStateByInstanceOrHandle WindowInstance: ExcelInstance State: UIAutomation.WindowState.Maximized
+WAIT 5
+Excel.SelectCellsFromExcel.SelectCells Instance: ExcelInstance2 StartColumn: $'''a''' StartRow: 1 EndColumn: $'''j''' EndRow: 3
+Excel.CopyCellsFromExcel.CopyCells Instance: ExcelInstance2 StartColumn: $'''a''' StartRow: 1 EndColumn: $'''j''' EndRow: 3
+Excel.InsertRow Instance: ExcelInstance Index: 1
+Excel.PasteCellsToExcel.PasteAt Instance: ExcelInstance Column: $'''a''' Row: 1
+Excel.CloseExcel.Close Instance: ExcelInstance2
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////Sub Task-Add_sensitivity/////////////////////////////////////////////////////////////////
+
+Excel.LaunchExcel.LaunchAndOpenUnderExistingProcess Path: $'''C:\\Users\\MSE230\\OneDrive - Maersk Group\\RKEMF1 20230314.xlsx''' Visible: True ReadOnly: False Instance=> ExcelInstance2
+WAIT 5
+UIAutomation.SetWindowVisibility.SetVisibilityByInstanceOrHandle WindowInstance: ExcelInstance Visibility: UIAutomation.Visibility.Visible
+UIAutomation.SetWindowState.SetStateByInstanceOrHandle WindowInstance: ExcelInstance State: UIAutomation.WindowState.Maximized
+WAIT 5
+Excel.SelectCellsFromExcel.SelectCells Instance: ExcelInstance2 StartColumn: $'''a''' StartRow: 1 EndColumn: $'''j''' EndRow: 3
+Excel.CopyCellsFromExcel.CopyCells Instance: ExcelInstance2 StartColumn: $'''a''' StartRow: 1 EndColumn: $'''j''' EndRow: 3
+Excel.InsertRow Instance: ExcelInstance Index: 1
+Excel.PasteCellsToExcel.PasteAt Instance: ExcelInstance Column: $'''a''' Row: 1
+Excel.CloseExcel.Close Instance: ExcelInstance2
